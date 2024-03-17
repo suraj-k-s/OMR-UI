@@ -7,7 +7,7 @@ This Django web application allows users to process OMR (Optical Mark Recognitio
 1. Clone the repository to your local machine:
 
     ```bash
-    [git clone <repository-url>](https://github.com/suraj-k-s/OMR-UI.git)
+    git clone https://github.com/suraj-k-s/OMR-UI.git
     ```
 
 2. Navigate to the project directory:
