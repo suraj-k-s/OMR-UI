@@ -13,7 +13,7 @@ This Django web application allows users to process OMR (Optical Mark Recognitio
 2. Navigate to the project directory:
 
     ```bash
-    cd omr_sheet_processing
+    cd OMR-UI
     ```
 
 3. Install the required Python packages using pip:
