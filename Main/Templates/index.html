@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OMR Sheet Processing</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header bg-primary text-white">Upload Sheets</div>
+            <div class="card-body">
+              <form
+                action="#"
+                method="post"
+                enctype="multipart/form-data"
+                id="omrForm"
+              >
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label for="images" class="form-label">Select Images:</label>
+                  <input
+                    type="file"
+                    class="form-control"
+                    id="images"
+                    name="images"
+                    accept="image/*"
+                    multiple
+                  />
+                </div>
+                <hr />
+                <p class="mb-3">Provide answers for each question:</p>
+                <div id="questionContainer">
+                  {% for i in q %}
+                  <div class="row mb-3 questionRow">
+                    <label class="col-sm-3 col-form-label">Question {{ i }}:</label>
+                    <div class="col-sm-8">
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="answer{{ i }}"
+                          id="answer{{ i }}A"
+                          value="A"
+                          required
+                        />
+                        <label class="form-check-label" for="answer{{ i }}A">A</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="answer{{ i }}"
+                          id="answer{{ i }}B"
+                          value="B"
+                        />
+                        <label class="form-check-label" for="answer{{ i }}B">B</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="answer{{ i }}"
+                          id="answer{{ i }}C"
+                          value="C"
+                        />
+                        <label class="form-check-label" for="answer{{ i }}C">C</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="answer{{ i }}"
+                          id="answer{{ i }}D"
+                          value="D"
+                        />
+                        <label class="form-check-label" for="answer{{ i }}D">D</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="answer{{ i }}"
+                          id="answer{{ i }}E"
+                          value="E"
+                        />
+                        <label class="form-check-label" for="answer{{ i }}E">E</label>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                <button type="submit" class="btn btn-primary mt-3" id="processBtn">
+                  Process Images
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Check if at least one radio button is selected for each question before submitting the form
+      document.getElementById('omrForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent form submission
+
+        // Check if at least one radio button is selected for each question
+        let allQuestionsAnswered = true;
+        for (let i = 1; i <= 5; i++) {
+          const answerOptions = document.getElementsByName('answer' + i);
+          let isSelected = false;
+          answerOptions.forEach(option => {
+            if (option.checked) {
+              isSelected = true;
+            }
+          });
+          if (!isSelected) {
+            allQuestionsAnswered = false;
+            break;
+          }
+        }
+
+        // If all questions are answered, submit the form
+        if (allQuestionsAnswered) {
+          this.submit();
+        } else {
+          alert('Please select at least one option for each question.');
+        }
+      });
+    </script>
+    <script>
+      // Add event listener to form submission
+      document.getElementById('omrForm').addEventListener('submit', function() {
+          // Trigger page reload after a short delay
+          setTimeout(function() {
+              location.reload();
+          }, 1000); // Adjust the delay as needed
+      });
+  </script>
+  </body>
+</html>
