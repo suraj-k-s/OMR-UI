@@ -15,8 +15,30 @@ This Django web application allows users to process OMR (Optical Mark Recognitio
     ```bash
     cd OMR-UI
     ```
+    
+3. Installing Virtualenv 
+    
+    ```
+    pip install virtualenv
+    ```
+    
+4. Creating Virtualenv
+    ```
+    virtualenv (environment name)
+    ```
 
-3. Install the required Python packages using pip:
+    OR
+
+   ```
+    python -m venv (environment name)
+    ```
+    
+5. Activating Environment:
+    ```
+    (environment name)\Scripts\activate  (Windows OS)
+    ```
+
+6. Install the required Python packages using pip:
 
     ```bash
     pip install -r requirements.txt
