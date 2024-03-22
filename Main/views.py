@@ -1,13 +1,13 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render
 import os
 from django.conf import settings
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 import cv2
 import numpy as np
 import zipfile
+import shutil
 from datetime import datetime
 from django.http import HttpResponse
+
 
 def Index(request):
     question = [1, 2, 3, 4, 5]  
@@ -31,17 +31,25 @@ def Index(request):
         current_datetime = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         folder_name = f'OMR_Answers_{current_datetime}'
         zip_file_name = f'OMR_Answers_{current_datetime}.zip'
-        folder_path = os.path.join(settings.MEDIA_ROOT, folder_name)
+        folder_path = os.path.join(settings.MEDIA_ROOT, 'OMR_Answers')  # Adjusted folder path
         zip_file_path = os.path.join(settings.MEDIA_ROOT, zip_file_name)
         
         # Move the processed images to the named folder
-        os.rename(os.path.join(settings.MEDIA_ROOT, 'OMR_Answers'), folder_path)
+        destination_path = os.path.join(folder_path, 'OMR_Sheets')
+        os.makedirs(destination_path)  # Create the destination folder if it doesn't exist
+        for filename in os.listdir(upload_folder):
+            source = os.path.join(upload_folder, filename)
+            destination = os.path.join(destination_path, filename)
+            shutil.move(source, destination)
         
         # Compress the named folder into a zip file
         with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for root, dirs, files in os.walk(folder_path):
                 for file in files:
                     zipf.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), folder_path))
+
+        # Delete the folder containing processed images
+        shutil.rmtree(folder_path)
 
         # Open the zip file in binary mode and serve it as a response
         with open(zip_file_path, 'rb') as f:
