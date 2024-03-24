@@ -1,0 +1,122 @@
+<!-- Submit.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OMR Sheet Processing</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header bg-primary text-white">Configure OMR Sheet Parameters</div>
+            <div class="card-body">
+              <form
+                method="post"
+                enctype="multipart/form-data"
+                id="omrForm"
+              >
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label for="numQuestions" class="form-label">Number of Questions:</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="numQuestions"
+                    name="numQuestions"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="optionsPerQuestion" class="form-label">Options per Question:</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="optionsPerQuestion"
+                    name="optionsPerQuestion"
+                    required
+                  />
+                </div>
+                <div class="mb-3 form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="negativeMarking"
+                    name="negativeMarking"
+                  />
+                  <label class="form-check-label" for="negativeMarking">Negative Marking</label>
+                </div>
+                <button type="button" class="btn btn-secondary mb-3" id="createQuestionRow">Create Question Row</button>
+                <div id="questionContainer">
+                  <!-- Dynamic question rows will be added here -->
+                </div>
+                <div class="mb-3">
+                  <label for="images" class="form-label">Select Images:</label>
+                  <input
+                    type="file"
+                    class="form-control"
+                    id="images"
+                    name="images"
+                    accept="image/*"
+                    multiple
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary" id="processBtn">Process Images</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Add event listener to the "Create Question Row" button
+      document.getElementById('createQuestionRow').addEventListener('click', function() {
+        // Get the number of questions and options per question
+        const numQuestions = document.getElementById('numQuestions').value;
+        const optionsPerQuestion = document.getElementById('optionsPerQuestion').value;
+        // Generate HTML for the question rows
+        let questionHTML = '';
+        for (let i = 1; i <= numQuestions; i++) {
+          questionHTML += `
+            <div class="row mb-3 questionRow">
+              <label class="col-sm-3 col-form-label">Question ${i}:</label>
+              <div class="col-sm-8">
+          `;
+          // Add radio inputs for each option
+          for (let j = 0; j < optionsPerQuestion; j++) {
+            const optionLetter = String.fromCharCode(65 + j); // Convert to ASCII character (A, B, C, ...)
+            questionHTML += `
+              <div class="form-check form-check-inline">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="answer${i}"
+                  id="answer${i}${optionLetter}"
+                  value="${optionLetter}"
+                  required
+                />
+                <label class="form-check-label" for="answer${i}${optionLetter}">${optionLetter}</label>
+              </div>
+            `;
+          }
+          questionHTML += `
+              </div>
+            </div>
+          `;
+        }
+        // Append the question HTML to the question container
+        document.getElementById('questionContainer').innerHTML = questionHTML;
+      });
+    </script>
+  </body>
+</html>
