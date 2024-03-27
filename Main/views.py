@@ -67,8 +67,11 @@ def Submit(request):
         with open(zip_file_path, 'rb') as f:
             response = HttpResponse(f.read(), content_type='application/zip')
             response['Content-Disposition'] = f'attachment; filename="{zip_file_name}"'
-            # Redirect back to the index page after downloading the zip file
-            return response
+        # Delete the zip file after serving it as a response
+        os.remove(zip_file_path)
+        shutil.rmtree(upload_folder)
+        # Redirect back to the index page after downloading the zip file
+        return response
     else:
         return render(request, "Submit.html")
 
@@ -114,8 +117,8 @@ def predictionFun(answers, upload_folder, num_questions, options_per_question, n
 
 
 def get_answers(path, answers, negative_marking, questions, choices):
-    widthImg = 700
-    heightImg = 700
+    # determining the height and width of the image
+    heightImg, widthImg = resize_image(questions, choices, 150, 150)
 
     # converting answers to indexes. calling the function from utils file
     answers = convertAnswers(answers)
@@ -268,6 +271,12 @@ def get_answers(path, answers, negative_marking, questions, choices):
         # except:
         #     print('An Error Occured')
 
+# function to return the width andheight of the image according to the questions and answers got
+def resize_image(num_questions, num_choices_per_question, question_height, choice_width):
+    img_height = num_questions * question_height
+    img_width = num_choices_per_question * choice_width
+    return img_height, img_width
+
 # function to find out the rectangle edges
 def rectContour(contours):
     rectangleContour = []
@@ -317,7 +326,7 @@ def splitBoxes(img, questions, choices):
 
 # function for marking the bubbles in the OMR sheet
 def showAnswers(img, myIndex, grading, answers, questions, choices):
-    sectionWidth = int(img.shape[1]/questions)
+    sectionWidth = int(img.shape[0]/questions)
     sectionHeight = int(img.shape[1]/choices)
 
     for i in range(0, questions):
@@ -329,7 +338,7 @@ def showAnswers(img, myIndex, grading, answers, questions, choices):
         if grading[i]:
             cv2.circle(img, (cX, cY), 50, (0, 255, 0), cv2.FILLED)
         elif grading[i] == 0 and myAns == -1: # checking wheather the bubble is marked nothing or more than one 
-            lineX = (sectionWidth * questions)
+            lineX = (sectionWidth * choices)
             img = cv2.line(img, (50, cY), (lineX - 50, cY), (0, 0, 255), 70)
 
             cX = (answers[i] * sectionWidth) + sectionWidth // 2
