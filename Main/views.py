@@ -39,7 +39,7 @@ def Submit(request):
         for i in questions:
             answers.append(request.POST.get("answer" + str(i)))
 
-        predictionFun(answers, upload_folder, num_questions, options_per_question, negative_marking)
+        predictionFun(answers, upload_folder, num_questions, options_per_question, negative_marking, answer_score, negative_score)
 
         # Create folder and zip file with current date and time
         current_datetime = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
@@ -79,7 +79,7 @@ def Submit(request):
 
     
 
-def predictionFun(answers, upload_folder, num_questions, options_per_question, negative_marking):
+def predictionFun(answers, upload_folder, num_questions, options_per_question, negative_marking, answer_score, negative_score):
     negative_marking = negative_marking
     questions = num_questions
     choices = options_per_question
@@ -102,9 +102,9 @@ def predictionFun(answers, upload_folder, num_questions, options_per_question, n
                 image_path = os.path.join(input_folder_path, filename)
 
                 # calling the function in main to get the answers marked in the image
-                img, score = get_answers(image_path, answers, negative_marking, questions, choices)
+                img, score = get_answers(image_path, answers, negative_marking, questions, choices, answer_score, negative_score)
 
-                new_filename = f"{os.path.splitext(filename)[0]}_{score}%{os.path.splitext(filename)[1]}"
+                new_filename = f"{os.path.splitext(filename)[0]}_{score}{os.path.splitext(filename)[1]}"
 
                 # Construct the full path to the output image
                 output_image_path = os.path.join(output_folder_path, new_filename)
@@ -118,7 +118,7 @@ def predictionFun(answers, upload_folder, num_questions, options_per_question, n
         print(f"The folder path '{input_folder_path}' does not exist.")
 
 
-def get_answers(path, answers, negative_marking, questions, choices):
+def get_answers(path, answers, negative_marking, questions, choices, answer_score, negative_score):
     # determining the height and width of the image
     heightImg, widthImg = resize_image(questions, choices, 150, 150)
 
@@ -210,7 +210,7 @@ def get_answers(path, answers, negative_marking, questions, choices):
                 if count_greater_than_5 > 1 or count_greater_than_5 < 1:
                     myIndex.append(-1)
                 else:
-                    myIndexVal = np.where(arr==np.amax(arr))
+                    myIndexVal = np.where(arr == np.amax(arr))
                     myIndex.append(myIndexVal[0][0])
             
             # also calculating the grade by comparing it with the answers that we have predefined.
@@ -224,12 +224,19 @@ def get_answers(path, answers, negative_marking, questions, choices):
             
             temp_grading = grading.copy()
 
+            temp_grading = [i * answer_score for i in temp_grading]
+
             if negative_marking:
                 for i in range(len(myIndex)):
                     if myIndex[i] != -1 and temp_grading[i] == 0:
-                        temp_grading[i] -= 1/3
+                        temp_grading[i] -= negative_score
 
-            score = (sum(temp_grading)/questions) * 100
+            score_sum = sum(temp_grading) 
+            score_sum = max(score_sum, 0.0)
+            score_sum = "{:.1f}".format(score_sum)
+            score_sum = '{:g}'.format(float(score_sum))
+
+            score = (sum(temp_grading) / questions) * 100
             score = round(score, 1)
             score = max(score, 0.0)
             if score == 100.0:
@@ -259,8 +266,10 @@ def get_answers(path, answers, negative_marking, questions, choices):
 
             # also we found out the grade before. and we add that grade into the small rectangle.
             # adding the Grade in the box
+            grade_text = str(score_sum) + '/' + str(questions * answer_score)
             imgRawGrade = np.zeros_like(imgGradeWarpColored)
-            cv2.putText(imgRawGrade, str(score) + '%', (20, 100), cv2.FONT_HERSHEY_COMPLEX, 3, (0, 256, 256), 3)
+            # cv2.putText(imgRawGrade, str(score) + '%', (20, 100), cv2.FONT_HERSHEY_COMPLEX, 3, (0, 256, 256), 3)
+            cv2.putText(imgRawGrade, grade_text, (75, 95), cv2.FONT_HERSHEY_COMPLEX, 2, (0, 256, 256), 3)
 
             gradeInvMatrix = cv2.getPerspectiveTransform(gradePoint2, gradePoint1)
             imgInvGradeWarp = cv2.warpPerspective(imgRawGrade, gradeInvMatrix, (widthImg, heightImg))
@@ -268,7 +277,7 @@ def get_answers(path, answers, negative_marking, questions, choices):
             # The final Image
             finalImg = cv2.addWeighted(finalImg, 1, imgInvGradeWarp, 1, 0)
 
-            return finalImg, score
+            return finalImg, score_sum
             
         # except:
         #     print('An Error Occured')
