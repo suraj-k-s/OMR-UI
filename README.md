@@ -24,18 +24,18 @@ This Django web application allows users to process OMR (Optical Mark Recognitio
     
 4. Creating Virtualenv
     ```
-    virtualenv omrenv
+    virtualenv env
     ```
 
     OR
 
    ```
-    python -m venv omrenv
+    python -m venv env
     ```
     
 5. Activating Environment:
     ```
-    omrenv\Scripts\activate
+    env\Scripts\activate
     ```
 
 6. Install the required Python packages using pip:

@@ -18,6 +18,8 @@ def Submit(request):
         # Get form data
         num_questions = int(request.POST.get("numQuestions"))
         options_per_question = int(request.POST.get("optionsPerQuestion"))
+        answer_score = int(request.POST.get("ascore"))
+        negative_score = int(request.POST.get("nscore"))
         negative_marking = True if request.POST.get("negativeMarking") == "on" else False
 
         # Generate question numbers
